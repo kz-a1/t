@@ -1,0 +1,86 @@
+/* QABAT / 3D effects layer: hero parallax, card tilt, tech ring */
+
+/* 1. Hero stage depth */
+.hero { perspective: 1400px; }
+.scene-stage { transform-style: preserve-3d; transform: rotateX(var(--fx-rx, 0deg)) rotateY(var(--fx-ry, 0deg)); transition: transform .5s var(--ease); will-change: transform; }
+.scene-stage .scene-glow { transform: translateZ(-90px) scale(1.18); }
+.scene-stage .scene-cross { transform: translateZ(60px); }
+.scene-stage .scene-caption { transform: translateZ(40px); }
+
+/* 2. Work card tilt + glare */
+.work-visual { transform-style: preserve-3d; }
+.work-visual > img { transform: translateZ(0) scale(1.04); }
+.work-visual::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .35s var(--ease);
+  background: radial-gradient(520px circle at var(--gx, 50%) var(--gy, 50%), rgba(255,255,255,.34), transparent 60%);
+  mix-blend-mode: soft-light;
+}
+.work-visual.is-tilting::after { opacity: 1; }
+.work-visual.is-tilting > img { transition: transform .12s linear; transform: translate3d(var(--px, 0px), var(--py, 0px), 0) scale(1.07); }
+.work-visual .project-hover, .work-visual .work-image-tag { transform-style: preserve-3d; }
+
+/* 3. Tech ring */
+.tech-ring { height: clamp(150px, 20vw, 260px); margin: 70px 0 20px; perspective: 1100px; perspective-origin: 50% 40%; overflow: clip; position: relative; touch-action: pan-y; cursor: grab; }
+.tech-ring.is-dragging { cursor: grabbing; }
+.tech-ring-spin { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; transform: rotateX(-8deg) rotateY(var(--ring, 0deg)); }
+.tech-ring-item {
+  position: absolute; left: 0; top: 0; translate: -50% -50%;
+  padding: .18em .55em .26em; border: 1px solid var(--line); border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  font-size: clamp(22px, 3.4vw, 54px); font-weight: 700; letter-spacing: -.05em; white-space: nowrap; color: var(--ink);
+  backface-visibility: hidden;
+}
+.tech-ring-item:nth-child(3n) { color: var(--bg); background: var(--lime); border-color: var(--lime); }
+.tech-ring::before, .tech-ring::after { content: ''; position: absolute; top: 0; bottom: 0; width: 14%; z-index: 2; pointer-events: none; }
+.tech-ring::before { left: 0; background: linear-gradient(90deg, var(--bg), transparent); }
+.tech-ring::after { right: 0; background: linear-gradient(-90deg, var(--bg), transparent); }
+
+/* Quality floor */
+.header { backdrop-filter: blur(14px); background: color-mix(in srgb, var(--bg) 88%, transparent); }
+.motion-off .scene-stage, .motion-off .work-visual > img { transform: none !important; }
+.motion-off .work-visual::after { display: none; }
+@media (hover: none), (max-width: 900px) {
+  .scene-stage { transform: none; }
+  .work-visual::after { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scene-stage { transform: none !important; transition: none; }
+}
+
+
+/* ===== 3D ауысулар ===== */
+
+/* 1. Бөлім ауысуы: төрт панель 3D бүктеліп жабылады, сосын ашылады */
+.page-curtain { perspective: 1200px; perspective-origin: 50% 30%; }
+.page-curtain > i { transform: rotateX(-90deg); transform-origin: bottom; backface-visibility: hidden; }
+.page-curtain > span { transform: translate(-50%, -50%) translateZ(90px); }
+.nav-cover .page-curtain > i { transform: rotateX(0deg); }
+.nav-reveal .page-curtain > i { transform-origin: top; transform: rotateX(90deg); }
+
+/* 2. Жоба терезесі: карточка сияқты 3D бұрылып ашылады және жабылады */
+@keyframes fx-flip-in { from { opacity: 0; transform: perspective(1800px) rotateY(-58deg) translateX(-8%) scale(.94); } to { opacity: 1; transform: none; } }
+@keyframes fx-flip-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: perspective(1800px) rotateY(58deg) translateX(8%) scale(.94); } }
+@keyframes fx-art-in { from { opacity: 0; transform: perspective(1400px) rotateY(22deg) translateX(40px); } to { opacity: 1; transform: none; } }
+@keyframes fx-copy-in { from { opacity: 0; transform: perspective(900px) rotateX(-32deg) translateY(16px); } to { opacity: 1; transform: none; } }
+.project-dialog[open] { animation: fx-flip-in .75s var(--ease) both; }
+.project-dialog.is-closing { animation: fx-flip-out .4s cubic-bezier(.7, 0, .84, 0) both; }
+.project-dialog[open] .dialog-art { animation: fx-art-in .9s .08s var(--ease) backwards; }
+.project-dialog[open] .dialog-copy > * { animation: fx-copy-in .7s var(--ease) backwards; }
+.project-dialog[open] .dialog-copy > :nth-child(1) { animation-delay: .14s; }
+.project-dialog[open] .dialog-copy > :nth-child(2) { animation-delay: .2s; }
+.project-dialog[open] .dialog-copy > :nth-child(3) { animation-delay: .26s; }
+.project-dialog[open] .dialog-copy > :nth-child(4) { animation-delay: .32s; }
+.project-dialog[open] .dialog-copy > :nth-child(5) { animation-delay: .38s; }
+.project-dialog[open] .dialog-copy > :nth-child(6) { animation-delay: .44s; }
+
+/* 3. Мобильді мәзір: сілтемелер 3D бұрылып шығады */
+@keyframes fx-link-in { from { opacity: 0; transform: perspective(900px) rotateX(-75deg) translateY(28px); } to { opacity: 1; transform: none; } }
+.menu-open .mobile-menu-inner > a:not(.menu-phone) { animation: fx-link-in .7s var(--ease) backwards; transform-origin: 50% 100%; }
+.menu-open .mobile-menu-inner > a:nth-of-type(1) { animation-delay: .1s; }
+.menu-open .mobile-menu-inner > a:nth-of-type(2) { animation-delay: .18s; }
+.menu-open .mobile-menu-inner > a:nth-of-type(3) { animation-delay: .26s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .project-dialog[open], .project-dialog[open] .dialog-art, .project-dialog[open] .dialog-copy > *, .menu-open .mobile-menu-inner > a { animation: none !important; }
+  .page-curtain > i { transition-duration: .01ms !important; }
+}
